@@ -1,0 +1,49 @@
+version: '3.2'
+services:
+  phpapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: phpapp_container
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Jakarta
+      - APP_ENV=local
+      - DB_CONNECTION=mongodb
+      - DB_HOST=172.21.0.1
+      - DB_PORT=27077
+      - DB_DATABASE=phpapp
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - SESSION_DRIVER=database
+      - SESSION_LIFETIME=120
+      - COMPOSER_CACHE_DIR=/tmp/.composer
+      - APP_KEY=GI9qWk7Y5nQp2bLLlEo97Ukzv0ec684C
+    volumes:
+      - '.:/var/www/html'
+      - '.docker/.composer/docker-cache/:/tmp/.composer:cached'
+      - '.docker/conf/site-laravel.conf:/etc/nginx/conf.d/site.conf'
+    ports:
+      - '8787:8787'
+    networks:
+      - phpappNetwork
+  mongodb:
+    image: mongo:5.0
+    container_name: phpapp_mongodb
+    ports:
+      - 27077:27017
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+networks:
+  phpappNetwork:
+    driver: bridge
+volumes:
+  nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: 'addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3'
+      device: ':/Users/laravel/data/docker-cache'
